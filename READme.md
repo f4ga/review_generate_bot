@@ -1,4 +1,3 @@
-```markdown
 # 🤖 Генератор отзывов на базе AI (Celery + GigaChat)
 
 [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://python.org)
@@ -9,8 +8,7 @@
 [![Flower](https://img.shields.io/badge/flower-2.0.1-yellow.svg)](https://flower.readthedocs.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Telegram‑бот, который генерирует правдоподобные отзывы на товары с помощью нейросети GigaChat.  
-Запросы обрабатываются асинхронно в очереди Celery — пользователь не ждёт ответа, а получает уведомление, когда отзыв готов.**
+**Telegram‑бот, который генерирует правдоподобные отзывы на товары с помощью нейросети GigaChat. Запросы обрабатываются асинхронно в очереди Celery — пользователь не ждёт ответа, а получает уведомление, когда отзыв готов.**
 
 ---
 
@@ -44,7 +42,7 @@
 ### 🔧 Предварительные требования
 
 - Установленные [Docker](https://docs.docker.com/get-docker/) и [Docker Compose](https://docs.docker.com/compose/install/) (для контейнерного запуска)  
-  **ИЛИ** Python 3.11+, Redis, [Poetry](https://python-poetry.org/) / pip
+  **ИЛИ** Python 3.11+, Redis, pip
 - Аккаунт в [Sber Developers](https://developers.sber.ru/) и **Authorization Key** для GigaChat
 - Токен Telegram‑бота (получить у [@BotFather](https://t.me/botfather))
 
@@ -52,18 +50,19 @@
 
 #### 1. Клонирование репозитория
 ```bash
-git clone https://github.com/yourusername/review-generator-bot.git
-cd review-generator-bot
-```
+git clone https://github.com/f4ga/review_generate_bot.git
+cd review_generate_bot
 
-#### 2. Настройка переменных окружения
-Скопируйте пример файла `.env` и заполните свои данные:
-```bash
+2. Настройка переменных окружения
+
+Скопируйте пример файла .env и заполните свои данные:
+bash
+
 cp .env.example .env
-```
 
-Отредактируйте `.env`:
-```env
+Отредактируйте .env:
+env
+```
 # Telegram
 BOT_TOKEN=ваш_токен_бота
 
@@ -75,96 +74,95 @@ GIGACHAT_AUTH_KEY=ваш_ключ_авторизации_гигачат
 GIGACHAT_MODEL=GigaChat
 GIGACHAT_SCOPE=GIGACHAT_API_PERS
 GIGACHAT_TIMEOUT=60
-```
 
-> 💡 **Где взять ключ GigaChat?**  
-> Зарегистрируйтесь на [developers.sber.ru](https://developers.sber.ru), создайте проект GigaChat и скопируйте **Authorization Key** (показывается только один раз!).
+    💡 Где взять ключ GigaChat?
+    Зарегистрируйтесь на developers.sber.ru, создайте проект GigaChat и скопируйте Authorization Key (показывается только один раз!).
 
----
+🐳 Запуск через Docker Compose (рекомендуется)
+bash
 
-### 🐳 Запуск через Docker Compose (рекомендуется)
-
-```bash
 docker-compose up -d
-```
 
 Будут запущены четыре контейнера:
-- `redis` — брокер сообщений
-- `tg_bot` — сам бот
-- `celery_worker` — воркер, обрабатывающий задачи
-- `flower` — веб‑мониторинг на порту `5555`
+
+    redis — брокер сообщений
+
+    tg_bot — сам бот
+
+    celery_worker — воркер, обрабатывающий задачи
+
+    flower — веб‑мониторинг на порту 5555
 
 Проверьте логи:
-```bash
+bash
+
 docker-compose logs -f
-```
 
-Теперь бот уже работает! Напишите ему в Telegram команду `/start`.
+Теперь бот уже работает! Напишите ему в Telegram команду /start.
+🖥 Локальный запуск (без Docker)
+1. Установка зависимостей
 
----
-
-### 🖥 Локальный запуск (без Docker)
-
-#### 1. Установка зависимостей
 Рекомендуется использовать виртуальное окружение:
-```bash
+bash
+
 python -m venv venv
 source venv/bin/activate      # Linux/macOS
 venv\Scripts\activate         # Windows
-```
 
 Установка пакетов:
-```bash
-pip install -r requirements.txt
-```
+bash
 
-#### 2. Запуск Redis
+pip install -r requirements.txt
+
+### 2. Запуск Redis
+
 Убедитесь, что Redis запущен локально. Если нет:
-```bash
+bash
+
 # через systemd (Linux)
 sudo systemctl start redis
 
 # или через Docker
 docker run -d -p 6379:6379 redis
-```
 
-#### 3. Запуск Celery worker
+3. Запуск Celery worker
+
 В отдельном терминале выполните:
-```bash
+bash
+
 celery -A tasks worker --loglevel=info
-```
 
-#### 4. Запуск бота
+4. Запуск бота
+
 В другом терминале:
-```bash
+bash
+
 python bot.py
-```
 
-#### 5. Мониторинг Flower (опционально)
-```bash
+5. Мониторинг Flower (опционально)
+bash
+
 celery -A tasks flower --port=5555
-```
-Откройте [http://localhost:5555](http://localhost:5555) для просмотра очереди задач.
 
----
+Откройте http://localhost:5555 для просмотра очереди задач.
+📱 Использование бота
 
-## 📱 Использование бота
+    Отправьте боту команду /start — он поприветствует вас.
 
-1. Отправьте боту команду `/start` — он поприветствует вас.
-2. Просто напишите название товара (например, *«крем для рук»* или *«набор отверток»*).
-3. Бот мгновенно ответит: *«⏳ Отзыв генерируется, подождите немного...»*
-4. Через несколько секунд (обычно 3–7) придет готовый развернутый отзыв.
+    Просто напишите название товара (например, «крем для рук» или «набор отверток»).
 
-**Пример ответа (без форматирования):**
-```
+    Бот мгновенно ответит: «⏳ Отзыв генерируется, подождите немного...»
+
+    Через несколько секунд (обычно 3–7) придет готовый развернутый отзыв.
+
+Пример ответа (без форматирования):
+text
+
 Отличная шариковая ручка! Пользуюсь уже неделю, пишет очень мягко, чернила не пачкают. Корпус приятный на ощупь, не скользит. Рекомендую к покупке!
-```
 
----
+📁 Структура проекта
+text
 
-## 📁 Структура проекта
-
-```
 .
 ├── .env.example           # Шаблон переменных окружения
 ├── .gitignore
@@ -176,55 +174,45 @@ celery -A tasks flower --port=5555
 ├── bot_instance.py        # Экземпляр бота (для импорта в задачи)
 ├── config.py              # Загрузка конфигурации из .env
 └── tasks.py               # Celery задачи (генерация отзывов через GigaChat)
-```
 
----
+⚙️ Переменные окружения
+Переменная	Описание	Обязательно	По умолчанию
+BOT_TOKEN	Токен Telegram‑бота	✅	—
+REDIS_URL	Адрес Redis‑сервера	❌	redis://localhost:6379/0
+GIGACHAT_AUTH_KEY	Ключ авторизации GigaChat	✅	—
+GIGACHAT_MODEL	Модель GigaChat	❌	GigaChat
+GIGACHAT_SCOPE	Область доступа (PERS для физлиц)	❌	GIGACHAT_API_PERS
+GIGACHAT_TIMEOUT	Таймаут запроса к API (сек)	❌	60
+🧠 Как это работает
 
-## ⚙️ Переменные окружения
+    Пользователь отправляет название товара боту.
 
-| Переменная             | Описание                                              | Обязательно | По умолчанию                     |
-|------------------------|-------------------------------------------------------|-------------|-----------------------------------|
-| `BOT_TOKEN`            | Токен Telegram‑бота                                   | ✅          | —                                 |
-| `REDIS_URL`            | Адрес Redis‑сервера                                   | ❌          | `redis://localhost:6379/0`        |
-| `GIGACHAT_AUTH_KEY`    | Ключ авторизации GigaChat                             | ✅          | —                                 |
-| `GIGACHAT_MODEL`       | Модель GigaChat                                       | ❌          | `GigaChat`                        |
-| `GIGACHAT_SCOPE`       | Область доступа (`PERS` для физлиц)                   | ❌          | `GIGACHAT_API_PERS`               |
-| `GIGACHAT_TIMEOUT`     | Таймаут запроса к API (сек)                           | ❌          | `60`                              |
+    Хэндлер в bot.py ставит задачу в Celery (generate_review.delay(...)) и сразу отвечает «Отзыв генерируется…».
 
----
+    Celery worker (процесс из tasks.py) забирает задачу и вызывает GigaChat API с детальным промптом.
 
-## 🧠 Как это работает
+    В случае ошибки 429 (Too Many Requests) задача автоматически повторяется с экспоненциальной задержкой.
 
-1. Пользователь отправляет название товара боту.
-2. Хэндлер в `bot.py` ставит задачу в Celery (`generate_review.delay(...)`) и сразу отвечает *«Отзыв генерируется…»*.
-3. Celery worker (процесс из `tasks.py`) забирает задачу и вызывает GigaChat API с детальным промптом.
-4. В случае ошибки 429 (Too Many Requests) задача автоматически повторяется с экспоненциальной задержкой.
-5. Полученный отзыв отправляется пользователю через прямой HTTP‑запрос к Telegram API (синхронно, без asyncio, чтобы избежать конфликтов циклов событий).
+    Полученный отзыв отправляется пользователю через прямой HTTP‑запрос к Telegram API (синхронно, без asyncio, чтобы избежать конфликтов циклов событий).
 
----
-
-## 🤝 Участие в разработке
+🤝 Участие в разработке
 
 Будем рады вашим идеям и улучшениям!
 
-1. Форкните репозиторий.
-2. Создайте ветку для фичи (`git checkout -b feature/amazing-feature`).
-3. Закоммитьте изменения (`git commit -m 'Add some amazing feature'`).
-4. Запушьте ветку (`git push origin feature/amazing-feature`).
-5. Откройте Pull Request.
+    Форкните репозиторий.
 
----
+    Создайте ветку для фичи (git checkout -b feature/amazing-feature).
 
-## 📬 Контакты
+    Закоммитьте изменения (git commit -m 'Add some amazing feature').
 
-Автор: [f4ga](https://github.com/f4ga)  
-Проект: [GitHub](https://github.com/f4ga/review-generator-bot)
+    Запушьте ветку (git push origin feature/amazing-feature).
 
-Если возникли вопросы или предложения — создавайте [Issue](https://github.com/yourusername/review-generator-bot/issues) или пишите в Telegram: [@ebssy](https://t.me/ebssy)
+    Откройте Pull Request.
 
----
+📬 Контакты
 
-<p align="center">
-  Сделано с ❤️ и ☕️ в 2026 году
-</p>
-```
+Автор: f4ga
+Проект: GitHub
+
+Если возникли вопросы или предложения — создавайте Issue или пишите в Telegram: @ebssy
+<p align="center"> Сделано с ❤️ и ☕️ в 2026 году </p> ```
